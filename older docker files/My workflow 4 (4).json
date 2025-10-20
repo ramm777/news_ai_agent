@@ -1,0 +1,456 @@
+{
+  "name": "My workflow 4",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1072,
+        640
+      ],
+      "id": "f85c6ebc-e1aa-4ae1-9767-c17829c963e6",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "gxPBdNAZh45YOvFJ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Step 1: Create Postgres Vector DB\n\n",
+        "height": 608,
+        "width": 1392
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        224,
+        256
+      ],
+      "id": "19ab6131-9aa7-41f8-a900-12783aa135e4",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        1024
+      ],
+      "id": "48a4058e-d239-4d92-86fa-7b61013206f1",
+      "name": "When chat message received",
+      "webhookId": "4091fa09-fb9a-4039-9411-7104d213f601"
+    },
+    {
+      "parameters": {
+        "name": "text",
+        "description": "This data is from the CBC Radio news articles.  \n",
+        "topK": null
+      },
+      "id": "70ff4271-3776-4800-9d50-69df5208ee31",
+      "name": "Answer questions with a vector store",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "position": [
+        1056,
+        1280
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant "
+        }
+      },
+      "id": "f49754a9-a18e-41c1-ac3b-7eaa262192e8",
+      "name": "AI Agent1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        800,
+        1024
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "546fd95c-8a62-4f0b-aba5-80e01a8b213e",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        800,
+        1504
+      ],
+      "typeVersion": 1.1,
+      "credentials": {
+        "openAiApi": {
+          "id": "gxPBdNAZh45YOvFJ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Step 2: AI Agent connected to RAG-PostgresSQL database\n",
+        "height": 752,
+        "width": 1392,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        224,
+        912
+      ],
+      "id": "4f407ab2-8972-4358-94e8-c8eb66e08efa",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "chunkSize": 1000000,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        736
+      ],
+      "id": "51ca2a3e-783c-4221-9ad5-447aa47f1427",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{$json[\"text\"]}} ",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "article id",
+                "value": "={{$json.metadata.content_id}}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        1360,
+        560
+      ],
+      "id": "579b574d-e986-4484-a59e-de5501597895",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {},
+      "id": "e8648aa0-3d66-409c-af8a-ea35258816ad",
+      "name": "Start - Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        224,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DROP TABLE IF EXISTS n8n_vectors, postgres_chat_memory;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        400,
+        528
+      ],
+      "id": "00cb60c4-3940-45a0-aa1a-c83be9bd2d25",
+      "name": "Delete existing Table in PostgresSQL",
+      "credentials": {
+        "postgres": {
+          "id": "roL1GOOgDiPMZsee",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "/files/news-dataset.json_processed.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        592,
+        384
+      ],
+      "id": "799f2fe8-4580-4198-8911-0084ecc56685",
+      "name": "Read Files from Disk (Docker Volume)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the first item from Read Binary File node\nconst item = items[0];\n\n// Decode the Base64 binary data to UTF-8 string\nconst jsonStr = Buffer.from(item.binary.data.data, 'base64').toString('utf-8');\n\n// Parse JSON\nconst data = JSON.parse(jsonStr);\n\n// Transform each record into its own n8n item\nreturn data.map(entry => ({\n  json: {\n    content_id: entry.content_id,\n    body_updated: entry.body_updated\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        784,
+        384
+      ],
+      "id": "2f94ec3c-e8ef-4a6d-91a7-bd697e5772d9",
+      "name": "Code to Read Binary File"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => ({\n  json: {\n    text: item.json.body_updated,\n    metadata: {\n      content_id: item.json.content_id\n    }\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        384
+      ],
+      "id": "332d0a64-5b4e-4486-8533-5ac47ee92408",
+      "name": "Code to Preproc"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "embeddingBatchSize": null,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.3,
+      "position": [
+        1200,
+        384
+      ],
+      "id": "9f90ad9a-3eaf-46ca-b3af-3b4c9463c36e",
+      "name": "Postgres PGVector Store 1",
+      "credentials": {
+        "postgres": {
+          "id": "roL1GOOgDiPMZsee",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.3,
+      "position": [
+        1088,
+        1552
+      ],
+      "id": "bc7f6794-7400-40db-9369-b3c2fc6ad78d",
+      "name": "Postgres PGVector Store 2",
+      "credentials": {
+        "postgres": {
+          "id": "roL1GOOgDiPMZsee",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableName": "postgres_chat_memory",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        896,
+        1248
+      ],
+      "id": "d5e8d801-cb98-4456-9628-77115e764923",
+      "name": "Chat Memory using Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "roL1GOOgDiPMZsee",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Postgres PGVector Store 1",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Postgres PGVector Store 2",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Postgres PGVector Store 1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start - Trigger": {
+      "main": [
+        [
+          {
+            "node": "Delete existing Table in PostgresSQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete existing Table in PostgresSQL": {
+      "main": [
+        [
+          {
+            "node": "Read Files from Disk (Docker Volume)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Files from Disk (Docker Volume)": {
+      "main": [
+        [
+          {
+            "node": "Code to Read Binary File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code to Read Binary File": {
+      "main": [
+        [
+          {
+            "node": "Code to Preproc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code to Preproc": {
+      "main": [
+        [
+          {
+            "node": "Postgres PGVector Store 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres PGVector Store 2": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory using Postgres": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "660f15ac-bf5d-442b-b4a4-f9a0fd27c6be",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dc02941fdb24db0e9d4e26535d8c1d6aadabfe85a05827cc833b509791e39f40"
+  },
+  "id": "nZGydK8AmxaehNfO",
+  "tags": []
+}
